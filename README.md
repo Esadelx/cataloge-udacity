@@ -1,4 +1,4 @@
-# cataloge-udacity
+
 <h1>Item-catalog-Project</h1>
 
 <article>
@@ -7,9 +7,13 @@ RestaurantMenu App for Item catalog project This is a python module that creates
 <h2>Using Google Login</h2>
 <ul>
 1- Go to your app's page in the Google APIs Console — https://console.developers.google.com/apis
+  
 2- Choose Credentials from the menu on the left.
+
 3- Create an OAuth Client ID.
+
 4- choose Web application.
+
 5- You will then be able to get the client ID and client secret.
 </ul>
 <h2>How to Run Project</h2>
