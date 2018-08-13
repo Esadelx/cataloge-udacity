@@ -1,34 +1,29 @@
-from flask import (Flask,
-                   render_template,
-                   request,
-                   redirect,
-                   jsonify,
-                   url_for,
-                   flash,
+from flask import (Flask, render_template,request,redirect,jsonify,url_for,flash,
                    send_from_directory)
 import datetime
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Category, Item, User
-from flask import session as login_session
-import random
-import string
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
-import httplib2
 import json
 from flask import make_response
 import requests
 import os
+import random
+import string
+from database_setup import Base, Category, Item, User
+from flask import session as login_session
+import httplib2
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
+
+
+
 
 app = Flask(__name__)
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Item Catalog"
-
+#moderators who can add.edit and delete any catagory
 moderators = ['esadelx@gmail.com','elwy789@gmail.com']
-# moderators are the only people who could add , edit or delete a category
-# deleting a category will result to delete all its items
 
 # Connect to Database and create database session
 engine = create_engine('sqlite:///itemcatalog.db',
@@ -38,8 +33,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-
-# Create anti-forgery state token
+# Create state token
 @app.route('/login')
 def showLogin():
     state = ''.join(
@@ -47,7 +41,6 @@ def showLogin():
     login_session['state'] = state
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
-
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
@@ -68,17 +61,6 @@ def fbconnect():
     result = h.request(url, 'GET')[1]
     # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/v2.8/me"
-    '''
-        Due to the formatting for the result from
-        the server token exchange we have to
-        split the token first on commas and select the
-        first index which gives us the key : value
-        for the server access token then we split it on
-        colons to pull out the actual token value
-        and replace the remaining quotes with nothing
-        so that it can be used directly in the graph
-        api calls
-    '''
     token = result.split(',')[0].split(':')[1].replace('"', '')
 
     url = ('https://graph.facebook.com/v2.8/me?'
@@ -92,8 +74,6 @@ def fbconnect():
     login_session['username'] = data["name"]
     login_session['email'] = data["email"]
     login_session['facebook_id'] = data["id"]
-
-    # The token must be stored in the login_session in order to properly logout
     login_session['access_token'] = token
 
     # Get user picture
@@ -143,7 +123,6 @@ def fbdisconnect():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
-    # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -198,7 +177,7 @@ def gconnect():
                                  200)
         response.headers['Content-Type'] = 'application/json'
         return response
-    # Store the access token in the session for later use.
+    # Store the access token in the session for later use on.
     login_session['access_token'] = credentials.access_token
     login_session['gplus_id'] = gplus_id
 
@@ -227,12 +206,12 @@ def gconnect():
         session.commit()
 
     output = ''
-    output += '<h1>Welcome, '
+    output += '<h1>WELCOME, '
     output += login_session['username']
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += """ " style = "width: 300px; height: 300px;
+    output += """ " style = "width: 400px; height: 400px;
         border-radius: 150px;-webkit-border-
         radius: 150px;-moz-border-radius: 150px;"> """
     if login_session['email'] in moderators:
@@ -267,9 +246,6 @@ def getUserID(email):
         return user.id
     except Exception:
         return None
-
-# DISCONNECT - Revoke a current user's token and reset their login_session
-
 
 @app.route('/gdisconnect')
 def gdisconnect():
@@ -315,9 +291,6 @@ def disconnect():
         flash("You were not logged in")
         return redirect(url_for('showHome'))
 
-
-# JSON APIs to view Restaurant Information
-
 @app.route('/catalog/JSON')
 def categoriesJSON():
     categoriesq = session.query(Category).all()
@@ -348,9 +321,7 @@ def showHome():
                                    categories=categories, user=getUserInfo
                                    (login_session['user_id']), litems=litems)
 
-# Create a new category
-
-
+# create catagory
 @app.route('/category/new/', methods=['GET', 'POST'])
 def newCategory():
     if login_session['email'] not in moderators:
@@ -367,9 +338,7 @@ def newCategory():
         return render_template('newCategory.html',
                                user=getUserInfo(login_session['user_id']))
 
-# Edit a category
-
-
+# edit a category
 @app.route('/category/<int:cat_id>/edit/', methods=['GET', 'POST'])
 def editCategory(cat_id):
     editedCategory = session.query(
@@ -391,7 +360,7 @@ def editCategory(cat_id):
                                user=getUserInfo(login_session['user_id']))
 
 
-# Delete a category
+# delete category
 @app.route('/category/<int:cat_id>/delete/', methods=['GET', 'POST'])
 def deleteCategory(cat_id):
     categoryToDelete = session.query(
@@ -419,8 +388,6 @@ def deleteCategory(cat_id):
                                user=getUserInfo(login_session['user_id']))
 
 # Show a category items
-
-
 @app.route('/category/<int:cat_id>/')
 @app.route('/category/<int:cat_id>/items/')
 def showMenu(cat_id):
@@ -441,8 +408,7 @@ def showMenu(cat_id):
                                creator=creator,
                                user=getUserInfo(login_session['user_id']))
 
-
-# Create a category item
+# create a category item
 @app.route('/category/<int:cat_id>/items/new/', methods=['GET', 'POST'])
 def newItem(cat_id):
     if 'username' not in login_session:
@@ -468,8 +434,7 @@ def newItem(cat_id):
                                user=getUserInfo(login_session['user_id']),
                                categories=categories)
 
-# Edit a category item
-
+# edit a category item
 
 @app.route('/category/<int:cat_id>/item/<int:item_id>/edit',
            methods=['GET', 'POST'])
@@ -504,8 +469,7 @@ def editItem(cat_id, item_id):
                                item=editedItem,
                                user=getUserInfo(login_session['user_id']))
 
-
-# Delete a category item
+# delete a category item
 @app.route('/category/<int:cat_id>/item/<int:item_id>/delete',
            methods=['GET', 'POST'])
 def deleteItem(cat_id, item_id):
@@ -547,12 +511,6 @@ def showItem(item_id):
 
 
 @app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico',
-                               mimetype='image/vnd.microsoft.icon')
-
-
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
