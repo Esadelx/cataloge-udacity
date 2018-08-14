@@ -90,7 +90,7 @@ def fbconnect():
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
-    usser = session.query(User).filter_by(id=user_id).one_or_none()
+    user = session.query(User).filter_by(id=user_id).one_or_none()
     if usser.picture != login_session['picture']:
         usser.picture = login_session['picture']
         session.add(usser)
@@ -510,7 +510,6 @@ def showItem(item_id):
                                category=category)
 
 
-@app.route('/favicon.ico')
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
