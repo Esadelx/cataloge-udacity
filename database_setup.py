@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 Base = declarative_base()
 
 
+#users table
 class User(Base):
     __tablename__ = 'user'
 
@@ -14,7 +15,7 @@ class User(Base):
     email = Column(String(250), nullable=False)
     picture = Column(String(250))
 
-
+#catagory table
 class Category(Base):
     __tablename__ = 'category'
 
@@ -32,7 +33,7 @@ class Category(Base):
 
         }
 
-
+#item table
 class Item(Base):
     __tablename__ = 'item'
 
@@ -48,7 +49,6 @@ class Item(Base):
 
     @property
     def serialize(self):
-        """Return object data in easily serializeable format"""
         return {
             'cat_id': self.cat_id,
             'description': self.description,
@@ -58,6 +58,5 @@ class Item(Base):
 
 
 engine = create_engine('sqlite:///itemcatalog.db')
-
 
 Base.metadata.create_all(engine)
