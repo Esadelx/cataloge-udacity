@@ -39,7 +39,6 @@ def showLogin():
     state = ''.join(
         random.choice(string.ascii_uppercase+string.digits) for x in range(32))
     login_session['state'] = state
-    # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
 
 @app.route('/fbconnect', methods=['POST'])
@@ -59,7 +58,6 @@ def fbconnect():
            '=%s&fb_exchange_token=%s') % (app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
-    # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/v2.8/me"
     token = result.split(',')[0].split(':')[1].replace('"', '')
 
@@ -90,9 +88,9 @@ def fbconnect():
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
-    user = session.query(User).filter_by(id=user_id).one_or_none()
-    if usser.picture != login_session['picture']:
-        usser.picture = login_session['picture']
+    userr = session.query(User).filter_by(id=user_id).one_or_none()
+    if userr.picture != login_session['picture']:
+        userr.picture = login_session['picture']
         session.add(usser)
         session.commit()
     output = ''
