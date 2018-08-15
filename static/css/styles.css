@@ -17,13 +17,6 @@ h2 {
 	line-height: 29px;
 }
 
-img {
-    max-width: 300px;
-    width: 100%;
-		max-height: 300px;
-    height: 100%;
-}
-
 h3 {
 	font-size: 18px;
 	color: #4A4A4A;
@@ -105,9 +98,9 @@ h3 {
 .divider.green {
 	background-color: #9FB80A;
 }
-.banner.main {
+.test{
 	height: 150px;
-	background: url("/static/top-banner.jpg");
+	background: url("/static/top-banner.png");
 	background-position: right;
 	background-repeat: no-repeat;
 	background-size: cover;
