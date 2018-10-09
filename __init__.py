@@ -27,14 +27,13 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 app = Flask(__name__)
 
 CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+    open('/var/www/catalog/catalog/client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "item catalog"
 # moderators who can add.edit and delete any catagory
 moderators = ['esadelx@gmail.com', 'elwy789@gmail.com']
 
 # Connect to Database and create database session
-engine = create_engine('sqlite:///ItemsCatalog2.db',
-                       connect_args={'check_same_thread': False}, echo=True)
+engine = create_engine('postgresql://catalog:catalog@localhost/catalog')
 Base.metadata.bind = engine
 
 session = scoped_session(sessionmaker(bind=engine))

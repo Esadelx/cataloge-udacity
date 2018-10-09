@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from Catalog_db import Catalog, Base, Items, User
+from database_setup import Catalog, Base, Items, User
 
-engine = create_engine('sqlite:///ItemsCatalog2.db')
+engine = create_engine('postgresql://catalog:catalog@localhost/catalog')
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
@@ -23,8 +23,8 @@ session.commit()
 catalog1 = Catalog(
     user_id=1,
     name="Resaturant",
-    picture='https: // encrypted - tbn0.gstatic.com / images"
-    "?q=tbn: ANd9GcQ5n1XaVO5MzQfSFjk69zddZ7 - FVG7 - jyb - N0lyBx3TR9Sd4j8m')
+    picture='https: // encrypted - tbn0.gstatic.com / images'
+    '?q=tbn: ANd9GcQ5n1XaVO5MzQfSFjk69zddZ7 - FVG7 - jyb - N0lyBx3TR9Sd4j8m')
 
 session.add(catalog1)
 session.commit()
